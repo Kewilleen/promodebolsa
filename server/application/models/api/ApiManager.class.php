@@ -13,7 +13,7 @@ class ApiManager extends Model
 
 	public function getVersion()
 	{
-		return $version;
+		return $this->version;
 	}
 
 	public function hasType($type = '')
@@ -49,7 +49,7 @@ class ApiManager extends Model
 			'SELECT `sorted` FROM `sorteio` WHERE `id` = :id', [':id' => $id]);
 		if (is_bool($query)) 
 			return $query;
-		return empty($query[0]);
+		return $query[0];
 	}
 
 	public function update($user = 0, $sorted = 0)
@@ -89,8 +89,13 @@ class ApiManager extends Model
 			'SELECT `id` FROM `sorteio` ORDER BY `id` DESC LIMIT 1');
 		if (is_bool($query)) 
 			return $query;
-		$id = (strlen($query[0]) > 3) ? substr($query[0], 0, -3) . '.' .substr($query[0], -3) : $query[0];
+		$id = $this->convert($query[0]);
 		return (!empty($query) && floatval($id) != $this->version->getMax());
+	}
+
+	public function convert($id = '')
+	{
+		return (strlen($id) > 3) ? substr($id, 0, -3) . '.' .substr($id, -3) : $id;
 	}
 
 	public function generate()

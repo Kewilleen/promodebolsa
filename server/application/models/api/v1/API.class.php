@@ -10,7 +10,7 @@ class API implements Version
 
 	function __construct($max = 99.999)
 	{
-		$min = 0;
+		$this->min = 0;
 		$this->max = $max;
 	}
 
@@ -39,7 +39,7 @@ class API implements Version
 	}
 
 	public function isMin($number) {
-		return $number > $this->min;
+		return $number < $this->min;
 	}
 
 	public function generateNumber($divisor = 99.999) {

@@ -47,8 +47,16 @@ class ApiController extends Controller
 				if ($this->api->hasUser($userId)) {
 					exit($this->args->sendStatus(9, 0, '', (microtime(true) - $start)));
 				}
+				$max = $this->api->getVersion()->getMax();
+				if (floatval($this->convert($userId)) >= $max) {
+					exit($this->args->sendStatus(10, 0, $max, (microtime(true) - $start)));
+				}
+				$min = $this->api->getVersion()->getMin();
+				if (floatval($this->convert($userId)) <= $min) {
+					exit($this->args->sendStatus(11, 0, $min, (microtime(true) - $start)));
+				}
 				$message = " Your ID is {$userId}";
-				$this->args->sendStatus(8, 1, $message, (microtime(true) - $start));
+				$this->args->sendStatus(8, 1, $message, (microtime(true) - $start), 0, $userId);
 				$this->api->insertUser($userId);
 			} else {
 				exit($this->args->sendStatus());
@@ -66,7 +74,7 @@ class ApiController extends Controller
 			// Create a user
 			if ($type == 'draw') {
 				//Call DrawClass
-				if ($this->api->hasUser($userId) && !$this->api->isDrawn($userId)) {
+				if ($this->api->hasUser($userId) && !empty($this->api->isDrawn($userId))) {
 					exit($this->args->sendStatus(3, 0, '', (microtime(true) - $start)));
 				}
 				if (!$this->api->hasProbability()) {
@@ -74,7 +82,7 @@ class ApiController extends Controller
 				}
 				$number = $this->api->generate();
 				$message = " Your lucky number is {$number}";
-				$this->args->sendStatus(5, 1, $message, (microtime(true) - $start));
+				$this->args->sendStatus(5, 1, $message, (microtime(true) - $start), $number, $userId);
 				if (!$this->api->hasUser($userId)) {
 					$this->api->insert($userId, $number);
 				} else {
@@ -86,11 +94,20 @@ class ApiController extends Controller
 				if (!$this->api->hasUser($userId)) {
 					exit($this->args->sendStatus(6, 0, '', (microtime(true) - $start)));
 				}
+				if ($this->api->isDrawn($userId) == '') {
+					exit($this->args->sendStatus(12, 0, '', (microtime(true) - $start)));
+				}
 				$number = $this->api->getNumber($userId);
 				$message = " Your lucky number is {$number}";
-				$this->args->sendStatus(7, 1, $message, (microtime(true) - $start));
+				$this->args->sendStatus(7, 1, $message, (microtime(true) - $start), $number, $userId);
 			}
 		}
+	}
+
+	private function convert($id = '')
+	{
+		return (strlen($id) > 2) ? 
+			((strlen($id) > 3) ? '' : 0)  . substr($id, 0, -3) . '.' .substr($id, -3) : $id;
 	}
 
 }

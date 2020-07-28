@@ -5,16 +5,21 @@
 class ArgumentsManager
 {
 
-	public function sendStatus($id = 0, $type = 0, $custom = '', $time = 0)
+	public function sendStatus($id = 0, $type = 0, $custom = '', $time = 0, $number = 0, $userId = 0)
 	{
 		$time = number_format($time, 5);
 		header("Content-type: application/json; charset=utf-8");
-		$json = json_encode([
+		$format = [
 			'statusId' => $id,
 			'status' => $this->getStatus($type), 
 			'message' => $this->getStatusId($id, $custom),
 			'responseTime' => "{$time}ms"
-		], JSON_PRETTY_PRINT);
+		];
+		if (!empty($number)) 
+			$format = array_merge($format, ['number' => $number]);
+		if (!empty($userId)) 
+			$format = array_merge($format, ['userId' => $userId]);
+		$json = json_encode($format, JSON_PRETTY_PRINT);
 		echo $json;
 	}
 
@@ -47,6 +52,12 @@ class ArgumentsManager
 				return "User create with success!{$custom}";
 			case 9:
 				return "This user has exists!{$custom}";
+			case 10:
+				return "ID cannot be bigger than {$custom}";
+			case 11:
+				return "ID cannot be less than {$custom}";
+			case 12:
+				return "ID not have drawn number yet";
 			default:
 				return "Invalid syntax check the documentation.";
 		}
